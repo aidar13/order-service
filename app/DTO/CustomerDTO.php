@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\DTO;
 
 /** The caller, as asserted by the API gateway. */
-final readonly class Customer
+final readonly class CustomerDTO
 {
     public function __construct(
         public int $id,
         public ?string $email,
         public ?string $phone,
-    ) {}
+    ) {
+    }
 }

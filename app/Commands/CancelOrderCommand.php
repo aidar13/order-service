@@ -12,5 +12,6 @@ final readonly class CancelOrderCommand implements Command
 {
     public function __construct(
         public Order $order,
-    ) {}
+    ) {
+    }
 }

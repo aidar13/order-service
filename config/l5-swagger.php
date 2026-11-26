@@ -8,7 +8,7 @@ use L5Swagger\Generator;
 use OpenApi\scan;
 
 return [
-    'default' => 'default',
+    'default'        => 'default',
     'documentations' => [
         'default' => [
             'api' => [
@@ -77,9 +77,9 @@ return [
              *   'api' => ['auth:sanctum'],
              */
             'middleware' => [
-                'api' => [],
-                'asset' => [],
-                'docs' => [],
+                'api'             => [],
+                'asset'           => [],
+                'docs'            => [],
                 'oauth2_callback' => [],
             ],
 

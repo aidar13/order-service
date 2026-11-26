@@ -41,10 +41,10 @@ class Order extends Model
     {
         return [
             'customer_id' => 'integer',
-            'status' => OrderStatus::class,
+            'status'      => OrderStatus::class,
             'total_cents' => 'integer',
-            'paid_at' => 'immutable_datetime',
-            'created_at' => 'immutable_datetime',
+            'paid_at'     => 'immutable_datetime',
+            'created_at'  => 'immutable_datetime',
         ];
     }
 

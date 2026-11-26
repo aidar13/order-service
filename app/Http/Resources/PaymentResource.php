@@ -24,11 +24,11 @@ final class PaymentResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->public_id,
-            'provider' => $this->provider,
-            'status' => $this->status->value,
-            'amount_cents' => $this->amount_cents,
-            'payment_url' => $this->payment_url,
+            'id'             => $this->public_id,
+            'provider'       => $this->provider,
+            'status'         => $this->status->value,
+            'amount_cents'   => $this->amount_cents,
+            'payment_url'    => $this->payment_url,
             'failure_reason' => $this->failure_reason,
         ];
     }

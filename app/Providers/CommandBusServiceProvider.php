@@ -27,9 +27,9 @@ final class CommandBusServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->make(Dispatcher::class)->map([
-            CreateOrderCommand::class => CreateOrderHandler::class,
-            CancelOrderCommand::class => CancelOrderHandler::class,
-            StartPaymentCommand::class => StartPaymentHandler::class,
+            CreateOrderCommand::class          => CreateOrderHandler::class,
+            CancelOrderCommand::class          => CancelOrderHandler::class,
+            StartPaymentCommand::class         => StartPaymentHandler::class,
             HandlePaymentWebhookCommand::class => HandlePaymentWebhookHandler::class,
         ]);
     }

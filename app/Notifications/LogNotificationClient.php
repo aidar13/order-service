@@ -8,9 +8,11 @@ use App\Contracts\NotificationClient;
 use Psr\Log\LoggerInterface;
 
 /** Used when no notification service is configured. */
-final class LogNotificationClient implements NotificationClient
+final readonly class LogNotificationClient implements NotificationClient
 {
-    public function __construct(private readonly LoggerInterface $logger) {}
+    public function __construct(private LoggerInterface $logger)
+    {
+    }
 
     public function send(string $event, array $recipient, array $payload, string $idempotencyKey): void
     {

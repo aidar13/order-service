@@ -8,7 +8,7 @@ use App\Contracts\NotificationClient;
 use App\Contracts\OrderRepository;
 use App\Contracts\PaymentRepository;
 use App\Contracts\ProductRepository;
-use App\DTO\Customer;
+use App\DTO\CustomerDTO;
 use App\Exceptions\MissingCustomer;
 use App\Handlers\CreateOrderHandler;
 use App\Notifications\HttpNotificationClient;
@@ -33,39 +33,39 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bind(PaymentRepository::class, EloquentPaymentRepository::class);
 
         // Resolved per request, after TrustGateway has verified who is talking to us.
-        $this->app->bind(Customer::class, function (Application $app): Customer {
+        $this->app->bind(CustomerDTO::class, function (Application $app): CustomerDTO {
             $request = $app->make(Request::class);
-            $id = (string) $request->header('X-User', '');
+            $id      = (string)$request->header('X-User', '');
 
-            if (! ctype_digit($id)) {
+            if (!ctype_digit($id)) {
                 throw new MissingCustomer;
             }
 
-            return new Customer(
-                (int) $id,
+            return new CustomerDTO(
+                (int)$id,
                 $request->header('X-User-Email') ?: null,
                 $request->header('X-User-Phone') ?: null,
             );
         });
 
-        $this->app->when(CreateOrderHandler::class)->needs('$currency')->give(fn (): string => (string) config('orders.currency'));
+        $this->app->when(CreateOrderHandler::class)->needs('$currency')->give(fn(): string => (string)config('orders.currency'));
 
-        $this->app->bind(FakePayProvider::class, fn () => new FakePayProvider(
-            (string) config('orders.payments.fakepay.secret'),
-            (string) config('orders.payments.fakepay.checkout_url'),
+        $this->app->bind(FakePayProvider::class, fn() => new FakePayProvider(
+            (string)config('orders.payments.fakepay.secret'),
+            (string)config('orders.payments.fakepay.checkout_url'),
         ));
         $this->app->tag([FakePayProvider::class], 'payment.providers');
-        $this->app->bind(ProviderRegistry::class, fn (Application $app) => new ProviderRegistry($app->tagged('payment.providers')));
+        $this->app->bind(ProviderRegistry::class, fn(Application $app) => new ProviderRegistry($app->tagged('payment.providers')));
 
         $this->app->bind(NotificationClient::class, function (Application $app): NotificationClient {
-            $url = (string) config('orders.notifications.url');
+            $url = (string)config('orders.notifications.url');
 
             return $url === ''
                 ? new LogNotificationClient($app->make(LoggerInterface::class))
                 : new HttpNotificationClient(
                     $app->make(Http::class),
                     $url,
-                    (string) config('orders.notifications.api_key'),
+                    (string)config('orders.notifications.api_key'),
                 );
         });
     }

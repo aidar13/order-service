@@ -15,10 +15,10 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'sku' => strtoupper(fake()->unique()->bothify('???-###')),
-            'name' => fake()->words(3, true),
+            'sku'         => strtoupper(fake()->unique()->bothify('???-###')),
+            'name'        => fake()->words(3, true),
             'price_cents' => fake()->numberBetween(100, 100000),
-            'is_active' => true,
+            'is_active'   => true,
         ];
     }
 }

@@ -20,7 +20,7 @@ final class CommandBusTest extends TestCase
 
         foreach ($files as $file) {
             /** @var class-string $class */
-            $class = 'App\\Commands\\'.str_replace(['/', '.php'], ['\\', ''], $file->getRelativePathname());
+            $class   = 'App\\Commands\\' . str_replace(['/', '.php'], ['\\', ''], $file->getRelativePathname());
             $handler = app(Dispatcher::class)->getCommandHandler((new ReflectionClass($class))->newInstanceWithoutConstructor());
 
             $expected = Str::of($class)->replace('App\\Commands\\', 'App\\Handlers\\')->replaceLast('Command', 'Handler')->toString();

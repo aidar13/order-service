@@ -18,5 +18,6 @@ final readonly class HandlePaymentWebhookCommand implements Command
         public string $providerName,
         public string $rawBody,
         public string $signature,
-    ) {}
+    ) {
+    }
 }

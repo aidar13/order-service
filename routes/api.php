@@ -9,7 +9,7 @@ use App\Http\Middleware\TrustGateway;
 use Illuminate\Support\Facades\Route;
 
 // Public: the gateway reads this document to learn which routes exist.
-Route::get('openapi.json', static fn () => response()->file(base_path('docs/openapi.json'), ['Content-Type' => 'application/json']));
+Route::get('openapi.json', static fn() => response()->file(base_path('docs/openapi.json'), ['Content-Type' => 'application/json']));
 
 Route::middleware(TrustGateway::class)->group(function (): void {
     Route::get('products', [ProductController::class, 'index']);

@@ -16,7 +16,7 @@ final class PaymentTest extends ApiTestCase
     {
         $headers = $this->asCustomer() + ($key === null ? [] : ['Idempotency-Key' => $key]);
 
-        return (string) $this->postJson("/api/orders/{$order['id']}/pay", ['provider' => 'fakepay'], $headers)
+        return (string)$this->postJson("/api/orders/{$order['id']}/pay", ['provider' => 'fakepay'], $headers)
             ->assertOk()
             ->assertJsonPath('data.status', 'pending')
             ->json('data.id');
@@ -29,7 +29,7 @@ final class PaymentTest extends ApiTestCase
         $this->postJson("/api/orders/{$order['id']}/pay", ['provider' => 'fakepay'], $this->asCustomer())
             ->assertOk()
             ->assertJsonPath('data.amount_cents', 70000)
-            ->assertJsonPath('data.payment_url', fn (string $url) => str_starts_with($url, 'https://pay.fakepay.example/checkout/fp_'));
+            ->assertJsonPath('data.payment_url', fn(string $url) => str_starts_with($url, 'https://pay.fakepay.example/checkout/fp_'));
     }
 
     public function test_repeated_requests_do_not_create_second_payment(): void
@@ -44,7 +44,7 @@ final class PaymentTest extends ApiTestCase
 
     public function test_successful_webhook_marks_order_paid_and_notifies_once(): void
     {
-        $order = $this->createOrder();
+        $order   = $this->createOrder();
         $payment = $this->pay($order);
         Queue::fake();
 
@@ -53,7 +53,7 @@ final class PaymentTest extends ApiTestCase
 
         $this->getJson("/api/orders/{$order['id']}", $this->asCustomer())->assertJsonPath('data.status', 'paid');
         Queue::assertPushed(SendCustomerNotification::class, 1);
-        Queue::assertPushed(SendCustomerNotification::class, fn (SendCustomerNotification $job) => $job->event === 'order.paid');
+        Queue::assertPushed(SendCustomerNotification::class, fn(SendCustomerNotification $job) => $job->event === 'order.paid');
     }
 
     public function test_declined_payment_leaves_order_payable(): void
@@ -86,7 +86,7 @@ final class PaymentTest extends ApiTestCase
 
     public function test_money_for_a_cancelled_order_is_flagged_for_refund(): void
     {
-        $order = $this->createOrder();
+        $order   = $this->createOrder();
         $payment = $this->pay($order);
         $this->postJson("/api/orders/{$order['id']}/cancel", [], $this->asCustomer())->assertOk();
 
@@ -118,14 +118,14 @@ final class PaymentTest extends ApiTestCase
 
         $order = $this->createOrder();
 
-        Http::assertSent(fn ($r) => $r['event'] === 'order.created'
+        Http::assertSent(fn($r) => $r['event'] === 'order.created'
             && $r['recipient'] === ['email' => 'buyer@example.test']
-            && $r['idempotency_key'] === 'order.created:'.$order['number']);
+            && $r['idempotency_key'] === 'order.created:' . $order['number']);
     }
 
     public function test_console_simulator_pays_an_order(): void
     {
-        $order = $this->createOrder();
+        $order   = $this->createOrder();
         $payment = $this->pay($order);
 
         $this->artisan('payments:simulate', ['payment' => $payment])->assertSuccessful();

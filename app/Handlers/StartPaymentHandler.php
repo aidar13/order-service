@@ -16,19 +16,20 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Str;
 
 /** Idempotent: retries with the same key, or a second click while one is pending, never double-charge. */
-final class StartPaymentHandler
+final readonly class StartPaymentHandler
 {
     public function __construct(
-        private readonly OrderRepository $orders,
-        private readonly PaymentRepository $payments,
-        private readonly ProviderRegistry $providers,
-        private readonly ConnectionInterface $db,
-    ) {}
+        private OrderRepository $orders,
+        private PaymentRepository $payments,
+        private ProviderRegistry $providers,
+        private ConnectionInterface $db,
+    ) {
+    }
 
     public function handle(StartPaymentCommand $command): Payment
     {
-        $order = $command->order;
-        $providerName = $command->providerName;
+        $order          = $command->order;
+        $providerName   = $command->providerName;
         $idempotencyKey = $command->idempotencyKey;
 
         $provider = $this->providers->get($providerName);
@@ -53,15 +54,15 @@ final class StartPaymentHandler
             }
 
             $payment = $this->payments->create([
-                'public_id' => (string) Str::uuid(),
-                'order_id' => $locked->id,
-                'provider' => $provider->name(),
-                'status' => PaymentStatus::Pending,
-                'amount_cents' => $locked->total_cents,
+                'public_id'       => (string)Str::uuid(),
+                'order_id'        => $locked->id,
+                'provider'        => $provider->name(),
+                'status'          => PaymentStatus::Pending,
+                'amount_cents'    => $locked->total_cents,
                 'idempotency_key' => $idempotencyKey,
             ]);
 
-            $intent = $provider->initiate($payment);
+            $intent               = $provider->initiate($payment);
             $payment->external_id = $intent->externalId;
             $payment->payment_url = $intent->paymentUrl;
             $this->payments->save($payment);

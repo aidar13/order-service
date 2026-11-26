@@ -15,5 +15,6 @@ final readonly class StartPaymentCommand implements Command
         public Order $order,
         public string $providerName,
         public ?string $idempotencyKey,
-    ) {}
+    ) {
+    }
 }

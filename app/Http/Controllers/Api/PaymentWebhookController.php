@@ -35,7 +35,7 @@ final class PaymentWebhookController extends Controller
         $payment = $bus->dispatch(new HandlePaymentWebhookCommand(
             $provider,
             $request->getContent(),
-            (string) $request->header('X-Signature', ''),
+            (string)$request->header('X-Signature', ''),
         ));
 
         return response()->json(['status' => $payment->status->value]);

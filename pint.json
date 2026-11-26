@@ -2,6 +2,19 @@
     "preset": "laravel",
     "rules": {
         "declare_strict_types": true,
-        "final_class": false
+        "final_class": false,
+        "binary_operator_spaces": {
+            "default": "single_space",
+            "operators": {
+                "=": "align_single_space_minimal",
+                "=>": "align_single_space_minimal"
+            }
+        },
+        "cast_spaces": { "space": "none" },
+        "concat_space": { "spacing": "one" },
+        "function_declaration": { "closure_fn_spacing": "none" },
+        "not_operator_with_successor_space": false,
+        "phpdoc_align": { "align": "left" },
+        "single_line_empty_body": false
     }
 }

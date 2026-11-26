@@ -16,14 +16,14 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'number' => 'ORD-'.fake()->unique()->numerify('########'),
-            'customer_id' => 1,
-            'customer_email' => 'customer@example.test',
-            'customer_phone' => null,
-            'status' => OrderStatus::New,
+            'number'           => 'ORD-' . fake()->unique()->numerify('########'),
+            'customer_id'      => 1,
+            'customer_email'   => 'customer@example.test',
+            'customer_phone'   => null,
+            'status'           => OrderStatus::New,
             'delivery_address' => fake()->streetAddress(),
-            'total_cents' => 5000,
-            'currency' => 'KZT',
+            'total_cents'      => 5000,
+            'currency'         => 'KZT',
         ];
     }
 }

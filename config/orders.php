@@ -10,13 +10,13 @@ return [
 
     'payments' => [
         'fakepay' => [
-            'secret' => env('FAKEPAY_WEBHOOK_SECRET', ''),
+            'secret'       => env('FAKEPAY_WEBHOOK_SECRET', ''),
             'checkout_url' => env('FAKEPAY_CHECKOUT_URL', 'https://pay.fakepay.example/checkout'),
         ],
     ],
 
     'notifications' => [
-        'url' => env('NOTIFICATION_SERVICE_URL', ''),
+        'url'     => env('NOTIFICATION_SERVICE_URL', ''),
         'api_key' => env('NOTIFICATION_SERVICE_API_KEY', ''),
     ],
 ];

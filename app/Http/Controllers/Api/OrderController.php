@@ -9,7 +9,7 @@ use App\Commands\CreateOrderCommand;
 use App\Commands\StartPaymentCommand;
 use App\Contracts\CommandBus;
 use App\Contracts\OrderRepository;
-use App\DTO\Customer;
+use App\DTO\CustomerDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PayOrderRequest;
 use App\Http\Requests\StoreOrderRequest;
@@ -23,7 +23,9 @@ use OpenApi\Attributes as OA;
 
 final class OrderController extends Controller
 {
-    public function __construct(private readonly CommandBus $bus) {}
+    public function __construct(private readonly CommandBus $bus)
+    {
+    }
 
     #[OA\Get(
         path: '/api/orders',
@@ -33,7 +35,7 @@ final class OrderController extends Controller
         parameters: [new OA\Parameter(name: 'per_page', in: 'query', schema: new OA\Schema(type: 'integer', maximum: 100))],
         responses: [new OA\Response(response: 200, description: 'Paginated orders')],
     )]
-    public function index(Request $request, Customer $customer, OrderRepository $orders): AnonymousResourceCollection
+    public function index(Request $request, CustomerDTO $customer, OrderRepository $orders): AnonymousResourceCollection
     {
         $perPage = min(max($request->integer('per_page', 15), 1), 100);
 
@@ -60,7 +62,7 @@ final class OrderController extends Controller
             new OA\Response(response: 422, description: 'Validation error / unknown product'),
         ],
     )]
-    public function store(StoreOrderRequest $request, Customer $customer): JsonResponse
+    public function store(StoreOrderRequest $request, CustomerDTO $customer): JsonResponse
     {
         return (new OrderResource($this->bus->dispatch(new CreateOrderCommand($request->toDto($customer)))))->response()->setStatusCode(201);
     }
@@ -76,7 +78,7 @@ final class OrderController extends Controller
             new OA\Response(response: 404, description: 'Not found'),
         ],
     )]
-    public function show(int $id, Customer $customer, CustomerOrderQuery $orders): OrderResource
+    public function show(int $id, CustomerDTO $customer, CustomerOrderQuery $orders): OrderResource
     {
         return new OrderResource($orders->get($id, $customer));
     }
@@ -89,7 +91,7 @@ final class OrderController extends Controller
         parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
         responses: [new OA\Response(response: 200, description: 'Cancelled'), new OA\Response(response: 409, description: 'Already paid or cancelled')],
     )]
-    public function cancel(int $id, Customer $customer, CustomerOrderQuery $orders): OrderResource
+    public function cancel(int $id, CustomerDTO $customer, CustomerOrderQuery $orders): OrderResource
     {
         return new OrderResource($this->bus->dispatch(new CancelOrderCommand($orders->get($id, $customer))));
     }
@@ -108,7 +110,7 @@ final class OrderController extends Controller
             new OA\Response(response: 409, description: 'Order cannot be paid'),
         ],
     )]
-    public function pay(int $id, PayOrderRequest $request, Customer $customer, CustomerOrderQuery $orders): PaymentResource
+    public function pay(int $id, PayOrderRequest $request, CustomerDTO $customer, CustomerOrderQuery $orders): PaymentResource
     {
         $payment = $this->bus->dispatch(new StartPaymentCommand(
             $orders->get($id, $customer),

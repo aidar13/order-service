@@ -6,9 +6,9 @@ namespace App\Enums;
 
 enum PaymentStatus: string
 {
-    case Pending = 'pending';
+    case Pending   = 'pending';
     case Succeeded = 'succeeded';
-    case Failed = 'failed';
+    case Failed    = 'failed';
 
     /** Money arrived for an order that can no longer accept it. */
     case RefundRequired = 'refund_required';

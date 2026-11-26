@@ -6,8 +6,8 @@ namespace App\Enums;
 
 enum OrderStatus: string
 {
-    case New = 'new';
-    case Paid = 'paid';
+    case New       = 'new';
+    case Paid      = 'paid';
     case Cancelled = 'cancelled';
 
     public function canTransitionTo(self $next): bool

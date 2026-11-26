@@ -11,12 +11,13 @@ use App\Exceptions\InvalidOrderState;
 use App\Models\Order;
 use Illuminate\Database\ConnectionInterface;
 
-final class CancelOrderHandler
+final readonly class CancelOrderHandler
 {
     public function __construct(
-        private readonly OrderRepository $orders,
-        private readonly ConnectionInterface $db,
-    ) {}
+        private OrderRepository $orders,
+        private ConnectionInterface $db,
+    ) {
+    }
 
     public function handle(CancelOrderCommand $command): Order
     {
@@ -26,7 +27,7 @@ final class CancelOrderHandler
             // Locked re-read: a payment webhook may be marking the same order as paid right now.
             $locked = $this->orders->lock($order->id);
 
-            if (! $locked->status->canTransitionTo(OrderStatus::Cancelled)) {
+            if (!$locked->status->canTransitionTo(OrderStatus::Cancelled)) {
                 throw InvalidOrderState::cannot('cancel', $locked->status);
             }
 

@@ -36,7 +36,7 @@ final class OrderApiTest extends ApiTestCase
 
         $this->postJson('/api/orders', [
             'delivery_address' => '1 Test St',
-            'items' => [
+            'items'            => [
                 ['sku' => 'BOX-M', 'quantity' => 3, 'price_cents' => 1],
                 ['sku' => 'PALLET', 'quantity' => 1],
             ],
@@ -46,7 +46,7 @@ final class OrderApiTest extends ApiTestCase
             ->assertJsonPath('data.items.0.unit_price_cents', 35000)
             ->assertJsonPath('data.status', 'new');
 
-        Queue::assertPushed(SendCustomerNotification::class, fn (SendCustomerNotification $job) => $job->event === 'order.created');
+        Queue::assertPushed(SendCustomerNotification::class, fn(SendCustomerNotification $job) => $job->event === 'order.created');
     }
 
     public function test_price_change_does_not_rewrite_existing_orders(): void

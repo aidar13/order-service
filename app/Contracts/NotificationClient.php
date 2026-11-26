@@ -8,8 +8,8 @@ namespace App\Contracts;
 interface NotificationClient
 {
     /**
-     * @param  array{email?: string, phone?: string}  $recipient
-     * @param  array<string, scalar|null>  $payload
+     * @param array{email?: string, phone?: string} $recipient
+     * @param array<string, scalar|null> $payload
      */
     public function send(string $event, array $recipient, array $payload, string $idempotencyKey): void;
 }

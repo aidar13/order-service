@@ -19,14 +19,14 @@ final class PayOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'provider' => ['required', 'string', Rule::in(app(ProviderRegistry::class)->names())],
+            'provider'        => ['required', 'string', Rule::in(app(ProviderRegistry::class)->names())],
             'idempotency_key' => ['nullable', 'string', 'max:100'],
         ];
     }
 
     public function provider(): string
     {
-        return (string) $this->validated('provider');
+        return (string)$this->validated('provider');
     }
 
     public function idempotencyKey(): ?string

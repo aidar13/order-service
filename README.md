@@ -2,7 +2,7 @@
 
 🇬🇧 English · [🇷🇺 Русский](#русский)
 
-Orders and payments microservice (Laravel 11) behind [`gateway-service`](../gateway-service). Fictional data — portfolio project.
+Orders and payments microservice (Laravel 11) behind [`gateway-service`](https://github.com/aidar13/gateway-service). Fictional data — portfolio project.
 
 ## Features
 
@@ -13,7 +13,7 @@ Orders and payments microservice (Laravel 11) behind [`gateway-service`](../gate
   - `Idempotency-Key` and "one pending payment per order" prevent double charges;
   - webhook: HMAC-SHA256 over the raw body, amount check, row lock, **duplicates are no-ops**;
   - money arriving for a cancelled order is marked `refund_required`.
-- Events `OrderCreated` / `OrderPaid` → listener → queued job (**dispatched after commit**) → `notification-service`.
+- Events `OrderCreatedEvent` / `OrderPaidEvent` → listener → queued job (**dispatched after commit**) → `notification-service`.
 - Authentication is delegated to the gateway: requests must carry the shared `X-Api-Key`; identity comes from `X-User*` headers.
 - `GET /api/openapi.json` — the document the gateway imports routes from.
 

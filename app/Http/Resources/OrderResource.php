@@ -27,19 +27,19 @@ final class OrderResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'number' => $this->number,
-            'status' => $this->status->value,
+            'id'               => $this->id,
+            'number'           => $this->number,
+            'status'           => $this->status->value,
             'delivery_address' => $this->delivery_address,
-            'total_cents' => $this->total_cents,
-            'currency' => $this->currency,
-            'paid_at' => $this->paid_at?->toIso8601String(),
-            'created_at' => $this->created_at->toIso8601String(),
-            'items' => $this->items->map(static fn (OrderItem $i): array => [
-                'sku' => $i->sku,
-                'name' => $i->name,
+            'total_cents'      => $this->total_cents,
+            'currency'         => $this->currency,
+            'paid_at'          => $this->paid_at?->toIso8601String(),
+            'created_at'       => $this->created_at->toIso8601String(),
+            'items'            => $this->items->map(static fn(OrderItem $i): array => [
+                'sku'              => $i->sku,
+                'name'             => $i->name,
                 'unit_price_cents' => $i->unit_price_cents,
-                'quantity' => $i->quantity,
+                'quantity'         => $i->quantity,
             ])->all(),
             'payments' => PaymentResource::collection($this->payments),
         ];

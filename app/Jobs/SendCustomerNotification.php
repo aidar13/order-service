@@ -21,15 +21,16 @@ final class SendCustomerNotification implements ShouldQueue, ShouldQueueAfterCom
     public int $tries = 5;
 
     /**
-     * @param  array{email?: string, phone?: string}  $recipient
-     * @param  array<string, scalar|null>  $payload
+     * @param array{email?: string, phone?: string} $recipient
+     * @param array<string, scalar|null> $payload
      */
     public function __construct(
         public readonly string $event,
         private readonly array $recipient,
         private readonly array $payload,
         private readonly string $idempotencyKey,
-    ) {}
+    ) {
+    }
 
     /** @return list<int> */
     public function backoff(): array

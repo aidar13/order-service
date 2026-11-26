@@ -18,7 +18,7 @@ abstract class ApiTestCase extends TestCase
     /** @return array<string, string> headers exactly as the gateway sends them */
     protected function asCustomer(int $id = 7, ?string $email = 'buyer@example.test'): array
     {
-        return array_filter(['X-Api-Key' => 'test-key', 'X-User' => (string) $id, 'X-User-Email' => (string) $email]);
+        return array_filter(['X-Api-Key' => 'test-key', 'X-User' => (string)$id, 'X-User-Email' => (string)$email]);
     }
 
     protected function product(string $sku = 'BOX-M', int $price = 35000): Product
@@ -29,14 +29,14 @@ abstract class ApiTestCase extends TestCase
     /** @return array<string, mixed> */
     protected function createOrder(int $customerId = 7): array
     {
-        if (! Product::query()->where('sku', 'BOX-M')->exists()) {
+        if (!Product::query()->where('sku', 'BOX-M')->exists()) {
             $this->product();
         }
 
         /** @var array<string, mixed> $data */
         $data = $this->postJson('/api/orders', [
             'delivery_address' => '1 Test St',
-            'items' => [['sku' => 'BOX-M', 'quantity' => 2]],
+            'items'            => [['sku' => 'BOX-M', 'quantity' => 2]],
         ], $this->asCustomer($customerId))->assertCreated()->json('data');
 
         return $data;
@@ -45,12 +45,12 @@ abstract class ApiTestCase extends TestCase
     /** @return TestResponse<Response> */
     protected function webhook(string $paymentId, int $amount, string $status = 'succeeded', ?string $signature = null): TestResponse
     {
-        $body = (string) json_encode(['payment_id' => $paymentId, 'status' => $status, 'amount_cents' => $amount]);
+        $body = (string)json_encode(['payment_id' => $paymentId, 'status' => $status, 'amount_cents' => $amount]);
 
         return $this->call('POST', '/api/payments/webhook/fakepay', [], [], [], [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_ACCEPT' => 'application/json',
-            'HTTP_X_API_KEY' => 'test-key',
+            'CONTENT_TYPE'     => 'application/json',
+            'HTTP_ACCEPT'      => 'application/json',
+            'HTTP_X_API_KEY'   => 'test-key',
             'HTTP_X_SIGNATURE' => $signature ?? $this->app->make(FakePayProvider::class)->sign($body),
         ], $body);
     }

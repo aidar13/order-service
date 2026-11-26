@@ -19,7 +19,7 @@ final class SimulatePaymentCommand extends Command
 
     public function handle(FakePayProvider $provider, CommandBus $bus): int
     {
-        if (! app()->environment('local', 'testing')) {
+        if (!app()->environment('local', 'testing')) {
             $this->error('Only available in the local environment.');
 
             return self::FAILURE;
@@ -32,9 +32,9 @@ final class SimulatePaymentCommand extends Command
             return self::FAILURE;
         }
 
-        $body = (string) json_encode([
-            'payment_id' => $payment->public_id,
-            'status' => $this->option('fail') ? 'failed' : 'succeeded',
+        $body = (string)json_encode([
+            'payment_id'   => $payment->public_id,
+            'status'       => $this->option('fail') ? 'failed' : 'succeeded',
             'amount_cents' => $payment->amount_cents,
         ]);
 

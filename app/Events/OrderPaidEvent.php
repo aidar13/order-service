@@ -7,9 +7,11 @@ namespace App\Events;
 use App\Models\Order;
 use Illuminate\Foundation\Events\Dispatchable;
 
-final class OrderPaid
+final readonly class OrderPaidEvent
 {
     use Dispatchable;
 
-    public function __construct(public readonly Order $order) {}
+    public function __construct(public Order $order)
+    {
+    }
 }

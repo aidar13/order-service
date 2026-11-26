@@ -10,8 +10,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 interface OrderRepository
 {
     /**
-     * @param  array<string, mixed>  $attributes
-     * @param  list<array<string, mixed>>  $items
+     * @param array<string, mixed> $attributes
+     * @param list<array<string, mixed>> $items
      */
     public function create(array $attributes, array $items): Order;
 

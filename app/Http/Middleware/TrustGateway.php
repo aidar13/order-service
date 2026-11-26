@@ -13,9 +13,9 @@ final class TrustGateway
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $expected = (string) config('orders.internal_api_key');
+        $expected = (string)config('orders.internal_api_key');
 
-        if ($expected === '' || ! hash_equals($expected, (string) $request->header('X-Api-Key', ''))) {
+        if ($expected === '' || !hash_equals($expected, (string)$request->header('X-Api-Key', ''))) {
             return response()->json(['message' => 'Unauthorized.'], 401);
         }
 

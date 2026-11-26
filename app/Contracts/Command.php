@@ -9,4 +9,6 @@ namespace App\Contracts;
  *
  * @template TResult what the handler returns
  */
-interface Command {}
+interface Command
+{
+}

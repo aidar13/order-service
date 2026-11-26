@@ -13,7 +13,7 @@ interface ProductRepository
     public function allActive(): Collection;
 
     /**
-     * @param  list<string>  $skus
+     * @param list<string> $skus
      * @return \Illuminate\Support\Collection<string, Product> keyed by SKU
      */
     public function activeBySkus(array $skus): \Illuminate\Support\Collection;
