@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Actions;
+namespace App\Handlers;
 
+use App\Commands\CreateOrderCommand;
 use App\Contracts\OrderRepository;
 use App\Contracts\ProductRepository;
-use App\DTO\CreateOrderData;
 use App\DTO\OrderLine;
 use App\Enums\OrderStatus;
 use App\Events\OrderCreated;
@@ -16,7 +16,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Str;
 
-final class CreateOrder
+final class CreateOrderHandler
 {
     public function __construct(
         private readonly OrderRepository $orders,
@@ -26,8 +26,10 @@ final class CreateOrder
         private readonly string $currency,
     ) {}
 
-    public function execute(CreateOrderData $data): Order
+    public function handle(CreateOrderCommand $command): Order
     {
+        $data = $command->data;
+
         $skus = array_map(static fn (OrderLine $l): string => $l->sku, $data->lines);
         $products = $this->products->activeBySkus($skus);
 

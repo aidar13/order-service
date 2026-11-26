@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Actions\HandlePaymentWebhook;
+use App\Commands\HandlePaymentWebhookCommand;
+use App\Contracts\CommandBus;
 use App\Models\Payment;
 use App\Payments\FakePayProvider;
 use Illuminate\Console\Command;
@@ -16,7 +17,7 @@ final class SimulatePaymentCommand extends Command
 
     protected $description = 'Send a signed FakePay webhook for a pending payment (local development only)';
 
-    public function handle(FakePayProvider $provider, HandlePaymentWebhook $webhook): int
+    public function handle(FakePayProvider $provider, CommandBus $bus): int
     {
         if (! app()->environment('local', 'testing')) {
             $this->error('Only available in the local environment.');
@@ -37,7 +38,7 @@ final class SimulatePaymentCommand extends Command
             'amount_cents' => $payment->amount_cents,
         ]);
 
-        $result = $webhook->execute(FakePayProvider::NAME, $body, $provider->sign($body));
+        $result = $bus->dispatch(new HandlePaymentWebhookCommand(FakePayProvider::NAME, $body, $provider->sign($body)));
         $this->info("Payment is now '{$result->status->value}'.");
 
         return self::SUCCESS;

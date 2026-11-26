@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Actions\CreateOrder;
 use App\Contracts\NotificationClient;
 use App\Contracts\OrderRepository;
 use App\Contracts\PaymentRepository;
 use App\Contracts\ProductRepository;
 use App\DTO\Customer;
 use App\Exceptions\MissingCustomer;
+use App\Handlers\CreateOrderHandler;
 use App\Notifications\HttpNotificationClient;
 use App\Notifications\LogNotificationClient;
 use App\Payments\FakePayProvider;
@@ -48,7 +48,7 @@ final class AppServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->when(CreateOrder::class)->needs('$currency')->give(fn (): string => (string) config('orders.currency'));
+        $this->app->when(CreateOrderHandler::class)->needs('$currency')->give(fn (): string => (string) config('orders.currency'));
 
         $this->app->bind(FakePayProvider::class, fn () => new FakePayProvider(
             (string) config('orders.payments.fakepay.secret'),

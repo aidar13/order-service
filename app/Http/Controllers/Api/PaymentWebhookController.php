@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\HandlePaymentWebhook;
+use App\Commands\HandlePaymentWebhookCommand;
+use App\Contracts\CommandBus;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,9 +30,13 @@ final class PaymentWebhookController extends Controller
         ],
         x: ['unauthenticated' => true],
     )]
-    public function __invoke(string $provider, Request $request, HandlePaymentWebhook $action): JsonResponse
+    public function __invoke(string $provider, Request $request, CommandBus $bus): JsonResponse
     {
-        $payment = $action->execute($provider, $request->getContent(), (string) $request->header('X-Signature', ''));
+        $payment = $bus->dispatch(new HandlePaymentWebhookCommand(
+            $provider,
+            $request->getContent(),
+            (string) $request->header('X-Signature', ''),
+        ));
 
         return response()->json(['status' => $payment->status->value]);
     }

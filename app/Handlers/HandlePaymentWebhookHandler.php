@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Actions;
+namespace App\Handlers;
 
+use App\Commands\HandlePaymentWebhookCommand;
 use App\Contracts\OrderRepository;
 use App\Contracts\PaymentRepository;
 use App\DTO\PaymentNotification;
@@ -17,7 +18,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\ConnectionInterface;
 
 /** Providers deliver webhooks at least once, so processing a duplicate must be a no-op. */
-final class HandlePaymentWebhook
+final class HandlePaymentWebhookHandler
 {
     public function __construct(
         private readonly ProviderRegistry $providers,
@@ -27,8 +28,12 @@ final class HandlePaymentWebhook
         private readonly ConnectionInterface $db,
     ) {}
 
-    public function execute(string $providerName, string $rawBody, string $signature): Payment
+    public function handle(HandlePaymentWebhookCommand $command): Payment
     {
+        $providerName = $command->providerName;
+        $rawBody = $command->rawBody;
+        $signature = $command->signature;
+
         $notification = $this->providers->get($providerName)->parseWebhook($rawBody, $signature);
 
         return $this->db->transaction(function () use ($providerName, $notification): Payment {

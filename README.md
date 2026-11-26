@@ -20,13 +20,21 @@ Orders and payments microservice (Laravel 11) behind [`gateway-service`](../gate
 ## Architecture
 
 ```
-Controller → FormRequest → DTO → Action → Repository (interface) → Model
-CreateOrder · GetCustomerOrder · CancelOrder · StartPayment · HandlePaymentWebhook
+Controller → FormRequest → DTO → Command → Handler → Repository (interface) → Model
+Commands: CreateOrder · CancelOrder · StartPayment · HandlePaymentWebhook      Query: CustomerOrderQuery
 PaymentProvider ← ProviderRegistry (Strategy/Adapter)    Events → Listener → Job → NotificationClient
 ```
 
-SOLID: one action per use case; a new provider is a new class plus one tag; actions depend on interfaces.
-DRY: ownership lives only in `GetCustomerOrder`, one listener serves every customer notification.
+SOLID: one command and handler per use case; a new provider is a new class plus one tag; handlers depend on interfaces.
+DRY: ownership lives only in `CustomerOrderQuery`, one listener serves every customer notification.
+
+## Commands and handlers
+
+Every use case is a **command** (immutable data, `app/Commands`) handled by exactly one **handler** (`app/Handlers`). Callers depend on the `CommandBus` interface; `LaravelCommandBus` runs it on Laravel's bus synchronously, and the map lives in `CommandBusServiceProvider`. `Command<TResult>` is generic, so PHPStan knows what `dispatch()` returns, and a test fails the build if a command has no handler.
+
+```php
+$payment = $this->bus->dispatch(new StartPaymentCommand($order, 'fakepay', $idempotencyKey));
+```
 
 ## Run
 
@@ -64,6 +72,6 @@ Quality: `composer test`, `composer analyse` (Larastan 8), `composer lint`, `com
 
 **Что внутри.** Заказ собирается из каталога, цены считает сервер и фиксирует в позициях. Клиент видит только свои заказы. Статусы `new → paid | cancelled` меняются под блокировкой строки. Оплата — через интерфейс `PaymentProvider` (вымышленный эквайер `FakePay`, карточные данные сервис не обрабатывает): `Idempotency-Key` и один ожидающий платёж на заказ против двойного списания; вебхук с HMAC-подписью, проверкой суммы и идемпотентностью; деньги по отменённому заказу помечаются `refund_required`. События → Job после коммита → `notification-service`. Аутентификацию делает шлюз: сервис проверяет внутренний ключ и читает заголовки `X-User*`.
 
-**Слои:** Controller → FormRequest → DTO → Action → Repository (интерфейс) → Model.
+**Слои:** Controller → FormRequest → DTO → Command → Handler → Repository (интерфейс) → Model; чтение заказа клиента — `CustomerOrderQuery`.
 
 **Запуск:** из `gateway-service` — `./scripts/platform-up.sh`; отдельно — блок выше. Проверки: `composer test`, `composer analyse`, `composer lint`.

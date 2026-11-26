@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\CancelOrder;
-use App\Actions\CreateOrder;
-use App\Actions\GetCustomerOrder;
-use App\Actions\StartPayment;
+use App\Commands\CancelOrderCommand;
+use App\Commands\CreateOrderCommand;
+use App\Commands\StartPaymentCommand;
+use App\Contracts\CommandBus;
 use App\Contracts\OrderRepository;
 use App\DTO\Customer;
 use App\Http\Controllers\Controller;
@@ -15,6 +15,7 @@ use App\Http\Requests\PayOrderRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\PaymentResource;
+use App\Queries\CustomerOrderQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -22,6 +23,8 @@ use OpenApi\Attributes as OA;
 
 final class OrderController extends Controller
 {
+    public function __construct(private readonly CommandBus $bus) {}
+
     #[OA\Get(
         path: '/api/orders',
         summary: 'Own orders, newest first',
@@ -57,9 +60,9 @@ final class OrderController extends Controller
             new OA\Response(response: 422, description: 'Validation error / unknown product'),
         ],
     )]
-    public function store(StoreOrderRequest $request, Customer $customer, CreateOrder $action): JsonResponse
+    public function store(StoreOrderRequest $request, Customer $customer): JsonResponse
     {
-        return (new OrderResource($action->execute($request->toDto($customer))))->response()->setStatusCode(201);
+        return (new OrderResource($this->bus->dispatch(new CreateOrderCommand($request->toDto($customer)))))->response()->setStatusCode(201);
     }
 
     #[OA\Get(
@@ -73,9 +76,9 @@ final class OrderController extends Controller
             new OA\Response(response: 404, description: 'Not found'),
         ],
     )]
-    public function show(int $id, Customer $customer, GetCustomerOrder $orders): OrderResource
+    public function show(int $id, Customer $customer, CustomerOrderQuery $orders): OrderResource
     {
-        return new OrderResource($orders->execute($id, $customer));
+        return new OrderResource($orders->get($id, $customer));
     }
 
     #[OA\Post(
@@ -86,9 +89,9 @@ final class OrderController extends Controller
         parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
         responses: [new OA\Response(response: 200, description: 'Cancelled'), new OA\Response(response: 409, description: 'Already paid or cancelled')],
     )]
-    public function cancel(int $id, Customer $customer, GetCustomerOrder $orders, CancelOrder $action): OrderResource
+    public function cancel(int $id, Customer $customer, CustomerOrderQuery $orders): OrderResource
     {
-        return new OrderResource($action->execute($orders->execute($id, $customer)));
+        return new OrderResource($this->bus->dispatch(new CancelOrderCommand($orders->get($id, $customer))));
     }
 
     #[OA\Post(
@@ -105,9 +108,13 @@ final class OrderController extends Controller
             new OA\Response(response: 409, description: 'Order cannot be paid'),
         ],
     )]
-    public function pay(int $id, PayOrderRequest $request, Customer $customer, GetCustomerOrder $orders, StartPayment $action): PaymentResource
+    public function pay(int $id, PayOrderRequest $request, Customer $customer, CustomerOrderQuery $orders): PaymentResource
     {
-        $payment = $action->execute($orders->execute($id, $customer), $request->provider(), $request->idempotencyKey());
+        $payment = $this->bus->dispatch(new StartPaymentCommand(
+            $orders->get($id, $customer),
+            $request->provider(),
+            $request->idempotencyKey(),
+        ));
         // Same response for a new payment and for an idempotent replay.
         $payment->wasRecentlyCreated = false;
 

@@ -2,23 +2,26 @@
 
 declare(strict_types=1);
 
-namespace App\Actions;
+namespace App\Handlers;
 
+use App\Commands\CancelOrderCommand;
 use App\Contracts\OrderRepository;
 use App\Enums\OrderStatus;
 use App\Exceptions\InvalidOrderState;
 use App\Models\Order;
 use Illuminate\Database\ConnectionInterface;
 
-final class CancelOrder
+final class CancelOrderHandler
 {
     public function __construct(
         private readonly OrderRepository $orders,
         private readonly ConnectionInterface $db,
     ) {}
 
-    public function execute(Order $order): Order
+    public function handle(CancelOrderCommand $command): Order
     {
+        $order = $command->order;
+
         return $this->db->transaction(function () use ($order): Order {
             // Locked re-read: a payment webhook may be marking the same order as paid right now.
             $locked = $this->orders->lock($order->id);

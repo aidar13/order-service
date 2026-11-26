@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Actions;
+namespace App\Handlers;
 
+use App\Commands\StartPaymentCommand;
 use App\Contracts\OrderRepository;
 use App\Contracts\PaymentRepository;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Exceptions\InvalidOrderState;
-use App\Models\Order;
 use App\Models\Payment;
 use App\Payments\ProviderRegistry;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Str;
 
 /** Idempotent: retries with the same key, or a second click while one is pending, never double-charge. */
-final class StartPayment
+final class StartPaymentHandler
 {
     public function __construct(
         private readonly OrderRepository $orders,
@@ -25,8 +25,12 @@ final class StartPayment
         private readonly ConnectionInterface $db,
     ) {}
 
-    public function execute(Order $order, string $providerName, ?string $idempotencyKey): Payment
+    public function handle(StartPaymentCommand $command): Payment
     {
+        $order = $command->order;
+        $providerName = $command->providerName;
+        $idempotencyKey = $command->idempotencyKey;
+
         $provider = $this->providers->get($providerName);
 
         return $this->db->transaction(function () use ($order, $provider, $idempotencyKey): Payment {
